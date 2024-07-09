@@ -283,17 +283,16 @@ by @bhoothihu / @devz_on
 @bot.message_handler(commands=['broadcast'])
 def broadcast_message(message):
     user_id = str(message.chat.id)
-    if user_id in admin_id:
+    if user_id == str(CHANNEL_ID):
         command = message.text.split(maxsplit=1)
         if len(command) > 1:
             message_to_broadcast = "Message To All Users By Admin:\n\n" + command[1]
-            with open(USER_FILE, "r") as file:
-                user_ids = file.read().splitlines()
-                for user_id in user_ids:
-                    try:
-                        bot.send_message(user_id, message_to_broadcast)
-                    except Exception as e:
-                        print(f"Failed to send broadcast message to user {user_id}: {str(e)}")
+            users_collection = db.users
+            for user in users_collection.find():
+                try:
+                    bot.send_message(user['user_id'], message_to_broadcast)
+                except Exception as e:
+                    print(f"Failed to send broadcast message to user {user['user_id']}: {str(e)}")
             response = "Broadcast Message Sent Successfully To All Users."
         else:
             response = "Please Provide A Message To Broadcast."
