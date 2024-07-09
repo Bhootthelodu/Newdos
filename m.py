@@ -17,15 +17,15 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 loop = asyncio.get_event_loop()
 
 TOKEN = '7335133323:AAE5yKOHkpu36HAiuTxpPCWwA5O-UEJpr2k'
-MONGO_URI = 'mongodb+srv://piroop:piroop@piro.hexrg9w.mongodb.net/?retryWrites=true&w=majority&appName=piro&tlsAllowInvalidCertificates=true'
-FORWARD_CHANNEL_ID = 1875300132
-CHANNEL_ID = 1875300132
-error_channel_id = 1875300132
+MONGO_URI = 'mongodb+srv://bhoothubc0:93IvsBDQxklcrP5C@devzdoz.7wpi3fn.mongodb.net/?retryWrites=true&w=majority&appName=devzdos&tlsAllowInvalidCertificates=true'
+FORWARD_CHANNEL_ID = -4258834764
+CHANNEL_ID = -4258834764
+error_channel_id = -4258834764
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
-db = client['soul']
+db = client['dev']
 users_collection = db.users
 
 bot = telebot.TeleBot(TOKEN)
@@ -210,33 +210,99 @@ def start_asyncio_thread():
     loop.run_until_complete(start_asyncio_loop())
 
 @bot.message_handler(commands=['start'])
-def send_welcome(message):
-    # Create a markup object
-    markup = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=True)
+def welcome_start(message):
+    user_name = message.from_user.first_name
+    response = f"Welcome, {user_name}!\nJust Run The Fckn Bot\nSee Commands : /help\nby @bhoothihu / @devz_on"
+    bot.reply_to(message, response)
+    
+@bot.message_handler(commands=['id'])
+def show_user_id(message):
+    user_id = str(message.chat.id)
+    response = f"Your ID: {user_id}"
+    bot.reply_to(message, response)
 
-    # Create buttons
-    btn1 = KeyboardButton("Instant Plan 🧡")
-    btn2 = KeyboardButton("Instant++ Plan 💥")
-    btn3 = KeyboardButton("Canary Download✔️")
-    btn4 = KeyboardButton("My Account🏦")
-    btn5 = KeyboardButton("Help❓")
-    btn6 = KeyboardButton("Contact admin✔️")
+@bot.message_handler(commands=['help'])
+def show_help(message):
+    help_text = '''Available commands:
+ /id : To check your id
+ /attack : Method For Bgmi Servers. 
+ /rules : Please Check Before Use !!
+ /plan : To Check available Plans
+ /admincmd : Shows All Admin Commands.
+ by @bhoothihu / @devz_on
+'''
+    for handler in bot.message_handlers:
+        if hasattr(handler, 'commands'):
+            if message.text.startswith('/help'):
+                help_text += f"{handler.commands[0]}: {handler.doc}\n"
+            elif handler.doc and 'admin' in handler.doc.lower():
+                continue
+            else:
+                help_text += f"{handler.commands[0]}: {handler.doc}\n"
+    bot.reply_to(message, help_text)
 
-    # Add buttons to the markup
-    markup.add(btn1, btn2, btn3, btn4, btn5, btn6)
+@bot.message_handler(commands=['rules'])
+def welcome_rules(message):
+    user_name = message.from_user.first_name
+    response = f'''{user_name} Please Follow These Rules:
 
-    bot.send_message(message.chat.id, "*Choose an option:*", reply_markup=markup, parse_mode='Markdown')
+1. Don't Use DDoS in Every Match.
+2. Play 3 match with DDoS and 1 match normal
+3. Don't spam attack on one ip
+4. Let the last attack finish before starting another attack
+by @bhoothihu / @devz_on'''
+    bot.reply_to(message, response)
 
-@bot.message_handler(func=lambda message: True)
-def handle_message(message):
-    if message.text == "Instant Plan 🧡":
-        bot.reply_to(message, "*Instant Plan selected*", parse_mode='Markdown')
-    elif message.text == "Instant++ Plan 💥":
-        bot.reply_to(message, "*Instant++ Plan selected*", parse_mode='Markdown')
-        attack_command(message)
-    elif message.text == "Canary Download✔️":
-        bot.send_message(message.chat.id, "*Please use the following link for Canary Download: https://t.me/bhoothubc/5*", parse_mode='Markdown')
-    elif message.text == "My Account🏦":
+@bot.message_handler(commands=['plan'])
+def welcome_plan(message):
+    user_name = message.from_user.first_name
+    response = f'''{user_name}, Here are the plans
+    1. 1 Day : 30rs
+    2. 3 Day : 80rs
+    3. 1 Week : 150rs
+    4. 1 Month : 500rs
+by @bhoothihu / @devz_on
+'''
+    bot.reply_to(message, response)
+
+@bot.message_handler(commands=['admincmd'])
+def welcome_plan(message):
+    user_name = message.from_user.first_name
+    response = f'''{user_name}, Admin Commands Are Here!!:
+
+/approve <userId> <time> or <plan> : Add a User.
+/disapprove <userid> Remove a User.
+/broadcast : Broadcast a Message.
+/clearlogs : Clear The Logs File.
+by @bhoothihu / @devz_on
+'''
+    bot.reply_to(message, response)
+
+
+@bot.message_handler(commands=['broadcast'])
+def broadcast_message(message):
+    user_id = str(message.chat.id)
+    if user_id in admin_id:
+        command = message.text.split(maxsplit=1)
+        if len(command) > 1:
+            message_to_broadcast = "Message To All Users By Admin:\n\n" + command[1]
+            with open(USER_FILE, "r") as file:
+                user_ids = file.read().splitlines()
+                for user_id in user_ids:
+                    try:
+                        bot.send_message(user_id, message_to_broadcast)
+                    except Exception as e:
+                        print(f"Failed to send broadcast message to user {user_id}: {str(e)}")
+            response = "Broadcast Message Sent Successfully To All Users."
+        else:
+            response = "Please Provide A Message To Broadcast."
+    else:
+        response = "Only Admin Can Run This Command."
+
+    bot.reply_to(message, response)
+    
+@bot.message_handler(commands=['myinfo'])
+def info_message(message):
         user_id = message.from_user.id
         user_data = users_collection.find_one({"user_id": user_id})
         if user_data:
@@ -251,12 +317,6 @@ def handle_message(message):
         else:
             response = "*No account information found. Please contact the administrator.*"
         bot.reply_to(message, response, parse_mode='Markdown')
-    elif message.text == "Help❓":
-        bot.reply_to(message, "*Help selected*", parse_mode='Markdown')
-    elif message.text == "Contact admin✔️":
-        bot.reply_to(message, "*Contact admin selected*", parse_mode='Markdown')
-    else:
-        bot.reply_to(message, "*Invalid option*", parse_mode='Markdown')
 
 if __name__ == "__main__":
     asyncio_thread = Thread(target=start_asyncio_thread, daemon=True)
@@ -269,3 +329,4 @@ if __name__ == "__main__":
             logging.error(f"An error occurred while polling: {e}")
         logging.info(f"Waiting for {REQUEST_INTERVAL} seconds before the next request...")
         time.sleep(REQUEST_INTERVAL)
+        
