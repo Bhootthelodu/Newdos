@@ -1,4 +1,4 @@
-import os
+yeimport os
 import telebot
 import json
 import requests
@@ -316,7 +316,7 @@ def info_message(message):
                         f"Current Time: {current_time}*")
         else:
             response = "*No account information found. Please contact the administrator.*"
-        bot.reply_to(message, response, parse_mode='Markdown')
+        bot.reply_to(message, response)
 
 if __name__ == "__main__":
     asyncio_thread = Thread(target=start_asyncio_thread, daemon=True)
