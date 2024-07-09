@@ -266,7 +266,7 @@ def process_attack_command(message):
             bot.send_message(message.chat.id, f"*Port {target_port} is blocked. Please use a different port.*", parse_mode='Markdown')
             return
 
-        asyncio.run_coroutine_threadsafe(run_attack_command_async(target_ip, target_port, duration))
+        asyncio.run_coroutine_threadsafe(run_attack_command_async(target_ip, target_port, duration), loop)
         bot.send_message(message.chat.id, f"*Attack started 💥\n\nHost: {target_ip}\nPort: {target_port}\nTime: {duration}*", parse_mode='Markdown')
     except Exception as e:
         logging.error(f"Error in processing attack command: {e}")
