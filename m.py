@@ -17,7 +17,7 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 loop = asyncio.get_event_loop()
 
 TOKEN = '7335133323:AAE5yKOHkpu36HAiuTxpPCWwA5O-UEJpr2k'
-MONGO_URI = 'mongodb+srv://bhoothubc0:93IvsBDQxklcrP5C@devzdoz.7wpi3fn.mongodb.net/?retryWrites=true&w=majority&appName=devzdos&tlsAllowInvalidCertificates=true'
+MONGO_URI = 'mongodb+srv://piroop:piroop@piro.hexrg9w.mongodb.net/?retryWrites=true&w=majority&appName=piro&tlsAllowInvalidCertificates=true'
 FORWARD_CHANNEL_ID = -4258834764
 CHANNEL_ID = -4258834764
 error_channel_id = -4258834764
@@ -25,7 +25,7 @@ error_channel_id = -4258834764
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
-db = client['dev']
+db = client['soul']
 users_collection = db.users
 
 bot = telebot.TeleBot(TOKEN)
