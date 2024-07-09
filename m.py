@@ -164,7 +164,7 @@ def attack_command(message):
     except Exception as e:
         logging.error(f"Error in attack command: {e}")
 
-@bot.message_handler(commands=['Attack'])
+@bot.message_handler(commands=['attack'])
 def attack_command(message):
     user_id = message.from_user.id
     chat_id = message.chat.id
@@ -192,7 +192,7 @@ def process_attack_command(message):
     try:
         args = message.text.split()
         if len(args) != 3:
-            bot.send_message(message.chat.id, "*Invalid command format. Please use: /Attack target_ip target_port time*", parse_mode='Markdown')
+            bot.send_message(message.chat.id, "*Invalid command format. Please use: /attack target_ip target_port time*", parse_mode='Markdown')
             return
         target_ip, target_port, duration = args[0], int(args[1]), args[2]
 
@@ -226,6 +226,7 @@ def show_help(message):
     help_text = '''Available commands:
  /id : To check your id
  /attack : Method For Bgmi Servers. 
+ /myinfo : To check your plan
  /rules : Please Check Before Use !!
  /plan : To Check available Plans
  /admincmd : Shows All Admin Commands.
