@@ -31,6 +31,61 @@ users_collection = db.users
 bot = telebot.TeleBot(TOKEN)
 REQUEST_INTERVAL = 1
 
+# File to store allowed user IDs
+USER_FILE = "users.txt"
+
+# File to store command logs
+LOG_FILE = "log.txt"
+
+# Function to read user IDs from the file
+def read_users():
+    try:
+        with open(USER_FILE, "r") as file:
+            return file.read().splitlines()
+    except FileNotFoundError:
+        return []
+
+# List to store allowed user IDs
+allowed_user_ids = read_users()
+
+# Function to log command to the file
+def log_command(user_id, target, port, time):
+    user_info = bot.get_chat(user_id)
+    if user_info.username:
+        username = "@" + user_info.username
+    else:
+        username = f"UserID: {user_id}"
+    
+    with open(LOG_FILE, "a") as file:  # Open in "append" mode
+        file.write(f"Username: {username}\nTarget: {target}\nPort: {port}\nTime: {time}\n\n")
+
+# Function to clear logs
+def clear_logs():
+    try:
+        with open(LOG_FILE, "r+") as file:
+            if file.read() == "":
+                response = "Logs are already cleared. No data found."
+            else:
+                file.truncate(0)
+                response = "Logs cleared successfully"
+    except FileNotFoundError:
+        response = "No logs found to clear."
+    return response
+
+# Function to record command logs
+def record_command_logs(user_id, command, target=None, port=None, time=None):
+    log_entry = f"UserID: {user_id} | Time: {datetime.datetime.now()} | Command: {command}"
+    if target:
+        log_entry += f" | Target: {target}"
+    if port:
+        log_entry += f" | Port: {port}"
+    if time:
+        log_entry += f" | Time: {time}"
+    
+    with open(LOG_FILE, "a") as file:
+        file.write(log_entry + "\n")
+        
+
 blocked_ports = [8700, 20000, 443, 17500, 9031, 20002, 20001]  # Blocked ports list
 
 async def start_asyncio_thread():
@@ -114,13 +169,13 @@ def approve_or_disapprove_user(message):
     days = int(cmd_parts[3]) if len(cmd_parts) >= 4 else 0
 
     if action == '/approve':
-        if plan == 1:  # Instant Plan 🧡
+        if plan == 1:  # Instant Plan 
             if users_collection.count_documents({"plan": 1}) >= 99:
-                bot.send_message(chat_id, "*Approval failed: Instant Plan 🧡 limit reached (99 users).*", parse_mode='Markdown')
+                bot.send_message(chat_id, "*Approval failed: Instant Plan  limit reached (99 users).*", parse_mode='Markdown')
                 return
-        elif plan == 2:  # Instant++ Plan 💥
+        elif plan == 2:  # Instant++ Plan 
             if users_collection.count_documents({"plan": 2}) >= 499:
-                bot.send_message(chat_id, "*Approval failed: Instant++ Plan 💥 limit reached (499 users).*", parse_mode='Markdown')
+                bot.send_message(chat_id, "*Approval failed: Instant++ Plan  limit reached (499 users).*", parse_mode='Markdown')
                 return
 
         valid_until = (datetime.now() + timedelta(days=days)).date().isoformat() if days > 0 else datetime.now().date().isoformat()
@@ -129,6 +184,8 @@ def approve_or_disapprove_user(message):
             {"$set": {"plan": plan, "valid_until": valid_until, "access_count": 0}},
             upsert=True
         )
+        with open(USER_FILE, 'a') as f:
+            f.write(str(target_user_id) + '\n')
         msg_text = f"*User {target_user_id} approved with plan {plan} for {days} days.*"
     else:  # disapprove
         users_collection.update_one(
@@ -136,6 +193,13 @@ def approve_or_disapprove_user(message):
             {"$set": {"plan": 0, "valid_until": "", "access_count": 0}},
             upsert=True
         )
+        with open(USER_FILE, 'r+') as f:
+            lines = f.readlines()
+            f.seek(0)
+            for line in lines:
+                if line.strip()!= str(target_user_id):
+                    f.write(line)
+            f.truncate()
         msg_text = f"*User {target_user_id} disapproved and reverted to free.*"
 
     bot.send_message(chat_id, msg_text, parse_mode='Markdown')
@@ -287,11 +351,12 @@ def broadcast_message(message):
         command = message.text.split(maxsplit=1)
         if len(command) > 1:
             message_to_broadcast = "Message To All Users By Admin:\n\n" + command[1]
-            users_collection = db.users
-            for user in users_collection.find():
-                try:
-                    bot.send_message(user['user_id'], message_to_broadcast)
-                except Exception as e:
+            with open(USER_FILE, "r") as file:
+                user_ids = file.read().splitlines()
+                for user_id in user_ids:
+                    try:
+                        bot.send_message(user_id, message_to_broadcast)
+                    except Exception as e:
                     print(f"Failed to send broadcast message to user {user['user_id']}: {str(e)}")
             response = "Broadcast Message Sent Successfully To All Users."
         else:
