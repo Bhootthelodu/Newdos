@@ -254,11 +254,13 @@ def attack_command(message):
 
 def process_attack_command(message):
     try:
-        args = message.text.split()
-        if len(args) != 3:
+        command = message.text.split()
+        if len(command) != 4:
             bot.send_message(message.chat.id, "*Invalid command format. Please use: /attack target_ip target_port time*", parse_mode='Markdown')
             return
-        target_ip, target_port, duration = args[0], int(args[1]), args[2]
+        target_ip = command[1]
+        target_port = int(command[2])
+        duration = int(command[3])
 
         if target_port in blocked_ports:
             bot.send_message(message.chat.id, f"*Port {target_port} is blocked. Please use a different port.*", parse_mode='Markdown')
