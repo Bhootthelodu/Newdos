@@ -357,7 +357,7 @@ def broadcast_message(message):
                     try:
                         bot.send_message(user_id, message_to_broadcast)
                     except Exception as e:
-                    print(f"Failed to send broadcast message to user {user['user_id']}: {str(e)}")
+                      print(f"Failed to send broadcast message to user {user_id}: {str(e)}")
             response = "Broadcast Message Sent Successfully To All Users."
         else:
             response = "Please Provide A Message To Broadcast."
