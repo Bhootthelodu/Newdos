@@ -204,7 +204,7 @@ def approve_or_disapprove_user(message):
 
     bot.send_message(chat_id, msg_text, parse_mode='Markdown')
     bot.send_message(CHANNEL_ID, msg_text, parse_mode='Markdown')
-@bot.message_handler(commands=['Attack'])
+@bot.message_handler(commands=['attack'])
 def attack_command(message):
     user_id = message.from_user.id
     chat_id = message.chat.id
